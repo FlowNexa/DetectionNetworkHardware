@@ -4,23 +4,20 @@ import (
 	"encoding/json"
 
 	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 )
 
-type HardwareInfo struct {
-	CPUInfo        []cpu.InfoStat             `json:"cpu_info"`
-	MemoryInfo     *mem.VirtualMemoryStat     `json:"memory_info"`
-	DiskPartitions []disk.PartitionStat       `json:"disk_partitions"`
-	DiskUsage      map[string]*disk.UsageStat `json:"disk_usage"`
-	NetworkInfo    []net.InterfaceStat        `json:"network_info"`
-	HostInfo       *host.InfoStat             `json:"host_info"`
+type Hardware struct {
+	CPUInfo     []cpu.InfoStat         `json:"cpu_info"`
+	MemoryInfo  *mem.VirtualMemoryStat `json:"memory_info"`
+	HostName    string                 `json:"host_name"`
+	IPAddresses []string               `json:"ip_addresses"`
 }
 
-func GetHardwareInfo() (*HardwareInfo, error) {
-	var info HardwareInfo
+func HardwareInfo() (*Hardware, error) {
+	var info Hardware
 
 	// Coletar informações da CPU
 	cpus, err := cpu.Info()
@@ -36,42 +33,32 @@ func GetHardwareInfo() (*HardwareInfo, error) {
 	}
 	info.MemoryInfo = vmem
 
-	// Coletar informações dos discos
-	partitions, err := disk.Partitions(true)
-	if err != nil {
-		return nil, err
-	}
-	info.DiskPartitions = partitions
-
-	diskUsageMap := make(map[string]*disk.UsageStat)
-	for _, p := range partitions {
-		usage, err := disk.Usage(p.Mountpoint)
-		if err != nil {
-			return nil, err
-		}
-		diskUsageMap[p.Mountpoint] = usage
-	}
-	info.DiskUsage = diskUsageMap
-
-	// Coletar informações da rede
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	info.NetworkInfo = interfaces
-
-	// Coletar informações do host
+	// Coletar informações do host (nome da máquina)
 	hinfo, err := host.Info()
 	if err != nil {
 		return nil, err
 	}
-	info.HostInfo = hinfo
+	info.HostName = hinfo.Hostname
+
+	// Coletar IP da máquina
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+
+	var ips []string
+	for _, intf := range interfaces {
+		for _, addr := range intf.Addrs {
+			ips = append(ips, addr.Addr)
+		}
+	}
+	info.IPAddresses = ips
 
 	return &info, nil
 }
 
-func GetHardwareInfoJSON() (string, error) {
-	info, err := GetHardwareInfo()
+func HardwareInfoJSON() (string, error) {
+	info, err := HardwareInfo()
 	if err != nil {
 		return "", err
 	}
