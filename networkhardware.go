@@ -2,6 +2,7 @@ package networkhardware
 
 import (
 	"encoding/json"
+
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -10,12 +11,12 @@ import (
 )
 
 type HardwareInfo struct {
-	CPUInfo       []cpu.InfoStat      `json:"cpu_info"`
-	MemoryInfo    *mem.VirtualMemoryStat `json:"memory_info"`
-	DiskPartitions []disk.PartitionStat  `json:"disk_partitions"`
-	DiskUsage     map[string]*disk.UsageStat `json:"disk_usage"`
-	NetworkInfo   []net.InterfaceStat  `json:"network_info"`
-	HostInfo      *host.InfoStat      `json:"host_info"`
+	CPUInfo        []cpu.InfoStat             `json:"cpu_info"`
+	MemoryInfo     *mem.VirtualMemoryStat     `json:"memory_info"`
+	DiskPartitions []disk.PartitionStat       `json:"disk_partitions"`
+	DiskUsage      map[string]*disk.UsageStat `json:"disk_usage"`
+	NetworkInfo    []net.InterfaceStat        `json:"network_info"`
+	HostInfo       *host.InfoStat             `json:"host_info"`
 }
 
 func GetHardwareInfo() (*HardwareInfo, error) {
@@ -36,7 +37,7 @@ func GetHardwareInfo() (*HardwareInfo, error) {
 	info.MemoryInfo = vmem
 
 	// Coletar informações dos discos
-	partitions, err := disk.Partitions(false)
+	partitions, err := disk.Partitions(true)
 	if err != nil {
 		return nil, err
 	}
