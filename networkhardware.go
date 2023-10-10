@@ -16,6 +16,9 @@ type Hardware struct {
 	IPAddresses []string               `json:"ip_addresses"`
 }
 
+// Coleta informações de hardware da máquina
+// Essa função coleta informações da CPU, memória, nome da máquina e IP da máquina
+// Retorna um ponteiro para uma struct Hardware e um erro
 func HardwareInfo() (*Hardware, error) {
 	var info Hardware
 
@@ -57,6 +60,9 @@ func HardwareInfo() (*Hardware, error) {
 	return &info, nil
 }
 
+// Coleta informações de hardware da máquina
+// Essa função coleta informações da CPU, memória, nome da máquina e IP da máquina
+// Retorna um JSON com as informações e um erro
 func HardwareInfoJSON() (string, error) {
 	info, err := HardwareInfo()
 	if err != nil {
